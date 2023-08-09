@@ -22,6 +22,8 @@ static BLEAdvertisedDevice* myDevice;
 BLERemoteCharacteristic* pRemoteChar_1;
 
 bool notifyFlag = false;
+bool stepFlag = true;
+int disp = 1;
 // Callback function for Notify function
 static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
                             uint8_t* pData,
@@ -141,7 +143,7 @@ void setup() {
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
   delay(100);
-  pBLEScan->start(5, false);
+  pBLEScan->start(10, false);
 } // End of setup.
 
 void loop() {
@@ -149,6 +151,9 @@ void loop() {
   // If the flag "doConnect" is true then we have scanned for and found the desired
   // BLE Server with which we wish to connect.  Now we connect to it.  Once we are 
   // connected we set the connected flag to be true.
+  if (stepFlag==true){
+    Serial.println("detectando pasos");    
+  }
   if (doConnect == true) {
     if (connectToServer()) {
       Serial.println("We are now connected to the BLE Server.");
@@ -161,7 +166,14 @@ void loop() {
   // If we are connected to a peer BLE Server, update the characteristic each time we are reached
   // with the current time since boot.
   if (connected) {
-    
+    if(disp==1){
+      Serial.println("contar");
+      disp++;
+    }
+    else if(disp==2){
+      Serial.println("dejar de contar"); 
+      disp-=1;
+    }
   }else if(doScan){
     Serial.println("empezare a scanear");
     BLEDevice::getScan()->start(0);  // this is just example to start scan after disconnect, most likely there is better way to do it in arduino

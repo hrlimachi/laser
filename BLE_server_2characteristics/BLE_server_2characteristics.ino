@@ -143,7 +143,7 @@ void loop() {
   }
 
   if (!deviceConnected && oldDeviceConnected) {
-    delay(100); // give the bluetooth stack the chance to get things ready
+    delay(1000); // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
