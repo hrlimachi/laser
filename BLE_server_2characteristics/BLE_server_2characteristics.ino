@@ -33,9 +33,6 @@ int pinButton = 19;
 bool statPrevBut = LOW;
 unsigned long millisTime = 0;
 
-int pinButton2 = 20;
-bool statPrevBut2 = LOW;
-unsigned long millisTime2 = 0;
 #define DEEP_SLEEP_TIME 1
 //sleep
 void goToDeepSleep(){
@@ -68,10 +65,12 @@ bool botonFun(int pin, bool* statePreviousButton, unsigned long* lastTime ) {
 // Callback function that is called whenever a client is connected or disconnected
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
+      Serial.println("un dispositivo conectado");
       deviceConnected = true;
     };
 
     void onDisconnect(BLEServer* pServer) {
+      Serial.println("un dispositivo desconectado");
       deviceConnected = false;
     }
 };
@@ -101,9 +100,9 @@ void setup() {
   pCharacteristic_1->addDescriptor(pDescr_1);
 
   // Add the BLE2902 Descriptor because we are using "PROPERTY_NOTIFY"
-  pBLE2902_1 = new BLE2902();
-  pBLE2902_1->setNotifications(true);
-  pCharacteristic_1->addDescriptor(pBLE2902_1);
+//  pBLE2902_1 = new BLE2902();
+//  pBLE2902_1->setNotifications(true);
+//  pCharacteristic_1->addDescriptor(pBLE2902_1);
 
   // Start the service
   pService->start();
@@ -122,13 +121,15 @@ void loop() {
   // notify changed value
   if (deviceConnected) {
     if (readyFlag) {
-      readyCount = digitalRead(pinButton) ? readyCount +1 : 0;
+      readyCount = !digitalRead(pinButton) ? readyCount +1 : 0;
+      Serial.println("readyCount esta en: "+ String(readyCount));
       funFlag = readyCount >=50;
       readyFlag = !funFlag;
       delay(100);
     }
     else if (funFlag) {
       if (botonFun(pinButton, &statPrevBut, &millisTime)) {
+        Serial.println("enviando numero");
         pCharacteristic_1->setValue(value);
         pCharacteristic_1->notify();
         waitFlag = true;
@@ -136,12 +137,13 @@ void loop() {
       }
     }
     else if(waitFlag){
+      delay(100);
       goToDeepSleep();
     }
   }
 
   if (!deviceConnected && oldDeviceConnected) {
-    delay(500); // give the bluetooth stack the chance to get things ready
+    delay(100); // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;

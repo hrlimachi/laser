@@ -21,6 +21,7 @@ static boolean doScan = false;
 static BLEAdvertisedDevice* myDevice;
 BLERemoteCharacteristic* pRemoteChar_1;
 
+bool notifyFlag = false;
 // Callback function for Notify function
 static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
                             uint8_t* pData,
@@ -33,7 +34,8 @@ static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
     for(int i = 1; i<length; i++) {
       counter = counter | (pData[i] << i*8);
     }
-
+    notifyFlag = counter==1;
+    
     // print to Serial
     Serial.print("Characteristic 1 (Notify) from server: ");
     Serial.println(counter );  
@@ -43,10 +45,12 @@ static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
 // Callback function that is called whenever a client is connected or disconnected
 class MyClientCallback : public BLEClientCallbacks {
   void onConnect(BLEClient* pclient) {
+    Serial.println("conectado al servidor");
   }
 
   void onDisconnect(BLEClient* pclient) {
     connected = false;
+    doScan = true;
     Serial.println("onDisconnect");
   }
 };
@@ -117,7 +121,7 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
       BLEDevice::getScan()->stop();
       myDevice = new BLEAdvertisedDevice(advertisedDevice);
       doConnect = true;
-      doScan = true;
+      doScan = false;
   
     } // Found our server
   } // onResult
@@ -136,6 +140,7 @@ void setup() {
   pBLEScan->setInterval(1349);
   pBLEScan->setWindow(449);
   pBLEScan->setActiveScan(true);
+  delay(100);
   pBLEScan->start(5, false);
 } // End of setup.
 
@@ -158,10 +163,12 @@ void loop() {
   if (connected) {
     
   }else if(doScan){
+    Serial.println("empezare a scanear");
     BLEDevice::getScan()->start(0);  // this is just example to start scan after disconnect, most likely there is better way to do it in arduino
+    Serial.println("termine de scanear");
   }
 
   // In this example "delay" is used to delay with one second. This is of course a very basic 
   // implementation to keep things simple. I recommend to use millis() for any production code
-  delay(1000);
+  //delay(1000);
 }
