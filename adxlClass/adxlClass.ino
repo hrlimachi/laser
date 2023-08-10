@@ -9,7 +9,7 @@ int adxlDelay = 500;
 //boton
 //---------------------------------------------------------------------------------------
 RTC_DATA_ATTR int bootNum = 0;
- //15
+int pin=15; //15
 
 class Adxl345 {
   public:
@@ -66,47 +66,6 @@ int16_t Adxl345::getZ() {
   return z;
 }
 //-----------------------------------------------------------------------------------------
-
-Adxl345 acel;
-
-void setup() {
-  Serial.begin(115200);
-  delay(10);
-  acel.adxlBegin();
-  bootNum++;
-  Serial.println("numero de boot: " + String(bootNum));
-
-  pinMode(led, OUTPUT);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
-
-  Serial.println("deep sleep");
-  Serial.flush();
-  digitalWrite(led, HIGH);
-}
-
-void loop() {
-  if ((millis() - adxlmillis) > adxlDelay) {
-    acel.askAcel();
-    int pastX = (int)acel.getX();
-    int pastY = (int)acel.getY();
-    int pastZ = (int)acel.getZ();
-    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
-    adxlmillis = millis();
-
-  }
-  if (true) {
-    //Serial.println(cont);
-    //cont++;
-    Serial.println("A dormir.............");
-    delay(200);
-    esp_deep_sleep_start();
-
-
-  }
-}
-
-
-
 class button{
   public:
     button(int pin);
@@ -149,4 +108,45 @@ bool button::buttonGet(){
     }
   }
   return flag;
+}
+//-----------------------------------------------------------------------------------------
+
+Adxl345 acel;
+button onButton(pin);
+
+void setup() {
+  Serial.begin(115200);
+  delay(10);
+  acel.adxlBegin();
+  onButton.initButton();
+  bootNum++;
+  Serial.println("numero de boot: " + String(bootNum));
+
+  pinMode(led, OUTPUT);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
+
+  Serial.println("deep sleep");
+  Serial.flush();
+  digitalWrite(led, HIGH);
+}
+
+void loop() {
+  if ((millis() - adxlmillis) > adxlDelay) {
+    acel.askAcel();
+    int pastX = (int)acel.getX();
+    int pastY = (int)acel.getY();
+    int pastZ = (int)acel.getZ();
+    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
+    adxlmillis = millis();
+
+  }
+  if (onButton.buttonGet()) {
+    //Serial.println(cont);
+    //cont++;
+    Serial.println("A dormir.............");
+    delay(200);
+    esp_deep_sleep_start();
+
+
+  }
 }
