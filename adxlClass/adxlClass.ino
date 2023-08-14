@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include "buttonH.h"
 #define ADXL345_ADDRESS 0x53
 #define led 2
 //millis adxl
@@ -25,7 +26,7 @@ class Adxl345 {
     int16_t y;
     int16_t z;
 };
-
+int cont=0;
 void Adxl345::adxlBegin() {
   Wire.begin();
   delay(100);
@@ -66,53 +67,53 @@ int16_t Adxl345::getZ() {
   return z;
 }
 //-----------------------------------------------------------------------------------------
-class button{
-  public:
-    button(int pin);
-    void initButton();
-    bool buttonGet();
-  private:
-    int cont;
-    bool statePrevBut;
-    unsigned long millisTime;
-    int delayMillis = 200;
-    bool flag = false;    //
-    int pinButton;
-};
-
-button::button(int pin)
-{
-  cont = 0;
-  statePrevBut = LOW;
-  millisTime = 0;  //last time
-  delayMillis = 200;
-  flag = false;
-  pinButton= pin;
-}
-void button::initButton(){
-  pinMode(pinButton,INPUT);
-}
-bool button::buttonGet(){
-  bool currentStateButton = digitalRead(pinButton);
-  flag = false;
-  if(statePrevBut != currentStateButton){
-    if(currentStateButton == HIGH){
-      if((millis()- millisTime)>delayMillis){
-        flag = true;
-        statePrevBut = currentStateButton;
-        millisTime = millis();
-      }
-    }
-    else{
-      statePrevBut = LOW;
-    }
-  }
-  return flag;
-}
+//class button{
+//  public:
+//    button(int pin);
+//    void initButton();
+//    bool buttonGet();
+//  private:
+//    int cont;
+//    bool statePrevBut;
+//    unsigned long millisTime;
+//    int delayMillis = 200;
+//    bool flag = false;    //
+//    int pinButton;
+//};
+//
+//button::button(int pin)
+//{
+//  cont = 0;
+//  statePrevBut = LOW;
+//  millisTime = 0;  //last time
+//  delayMillis = 200;
+//  flag = false;
+//  pinButton= pin;
+//}
+//void button::initButton(){
+//  pinMode(pinButton,INPUT);
+//}
+//bool button::buttonGet(){
+//  bool currentStateButton = digitalRead(pinButton);
+//  flag = false;
+//  if(statePrevBut != currentStateButton){
+//    if(currentStateButton == HIGH){
+//      if((millis()- millisTime)>delayMillis){
+//        flag = true;
+//        statePrevBut = currentStateButton;
+//        millisTime = millis();
+//      }
+//    }
+//    else{
+//      statePrevBut = LOW;
+//    }
+//  }
+//  return flag;
+//}
 //-----------------------------------------------------------------------------------------
 
 Adxl345 acel;
-button onButton(pin);
+buttonH onButton(pin);
 
 void setup() {
   Serial.begin(115200);
@@ -131,21 +132,21 @@ void setup() {
 }
 
 void loop() {
-  if ((millis() - adxlmillis) > adxlDelay) {
-    acel.askAcel();
-    int pastX = (int)acel.getX();
-    int pastY = (int)acel.getY();
-    int pastZ = (int)acel.getZ();
-    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
-    adxlmillis = millis();
-
-  }
+//  if ((millis() - adxlmillis) > adxlDelay) {
+//    acel.askAcel();
+//    int pastX = (int)acel.getX();
+//    int pastY = (int)acel.getY();
+//    int pastZ = (int)acel.getZ();
+//    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
+//    adxlmillis = millis();
+//
+//  }
   if (onButton.buttonGet()) {
-    //Serial.println(cont);
-    //cont++;
-    Serial.println("A dormir.............");
-    delay(200);
-    esp_deep_sleep_start();
+    Serial.println(cont);
+    cont++;
+//    Serial.println("A dormir.............");
+//    delay(200);
+//    esp_deep_sleep_start();
 
 
   }
