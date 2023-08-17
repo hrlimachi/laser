@@ -1,17 +1,22 @@
-//#ifndef _buttonH_h_
-//#define _buttonH_h_
-#include "Arduino.h"
+#ifndef ButtonH_h
+#define ButtonH_h
+#ifndef Arduino_h
+#include <Arduino.h>
+#endif
+#include "BlinkLed.h"
+#include "MillisTime.h"
 
-class buttonH{
+class ButtonH{
   public:
-    buttonH(int pin);
+    ButtonH(int pin);
     void initButton();
     bool buttonGet();
   private:
     int cont;
     bool statePrevBut;
     unsigned long millisTime;
-    int delayMillis = 200;
-    bool flag = false;    //
+    int delayMillis;
+    bool flag;    //
     int pinButton;
 };
+#endif

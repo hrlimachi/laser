@@ -1,3 +1,4 @@
+#include <buttonH.h>
 #include <Wire.h>
 #define ADXL345_ADDRESS 0x53
 #define led 2
@@ -12,71 +13,7 @@ int cont = 0;
 RTC_DATA_ATTR int bootNum = 0;
 int pin = 15;
 
-bool statPrevBut = LOW;
-unsigned long millisTime = 0;
-
 //-----------------------------------------------------------------------------------------
-
-Adxl345 acel;
-
-void setup() {
-  Serial.begin(115200);
-  delay(10);
-  acel.adxlBegin();
-  bootNum++;
-  Serial.println("numero de boot: " + String(bootNum));
-
-  pinMode(pin, INPUT);
-  pinMode(led, OUTPUT);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
-
-  Serial.println("deep sleep");
-  Serial.flush();
-  digitalWrite(led, HIGH);
-}
-
-void loop() {
-  if ((millis() - adxlmillis) > adxlDelay) {
-    acel.askAcel();
-    int pastX = (int)acel.getX();
-    int pastY = (int)acel.getY();
-    int pastZ = (int)acel.getZ();
-    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
-    adxlmillis = millis();
-
-  }
-  if (botonFun(pin, &statPrevBut, &millisTime)) {
-    //Serial.println(cont);
-    //cont++;
-    Serial.println("A dormir.............");
-    delay(200);
-    esp_deep_sleep_start();
-
-
-  }
-}
-
-bool botonFun(int pin, bool* statePreviousButton, unsigned long* lastTime ) {
-  bool stateCurrentButton = digitalRead(pin);
-  const int delayMillis = 200;
-  bool flag = false;
-  if (*statePreviousButton != stateCurrentButton) {
-    if (HIGH == stateCurrentButton) {
-      if ((millis() - *lastTime) > delayMillis) {
-        //inicio
-        flag = true;
-        //final
-        *statePreviousButton = stateCurrentButton;
-        *lastTime = millis();
-      }
-    }
-    else {
-      *statePreviousButton = LOW;
-    }
-  }
-  return flag;
-}
-
 class Adxl345 {
   public:
     Adxl345() {
@@ -130,4 +67,67 @@ int16_t Adxl345::getY() {
 }
 int16_t Adxl345::getZ() {
   return z;
+}
+//--------------------------------------------
+Adxl345 acel;
+buttonH button(pin);
+
+
+void setup() {
+  Serial.begin(115200);
+  delay(10);
+  acel.adxlBegin();
+  button.initButton();
+  bootNum++;
+  Serial.println("numero de boot: " + String(bootNum));
+
+  pinMode(pin, INPUT);
+  pinMode(led, OUTPUT);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
+
+  Serial.println("deep sleep");
+  Serial.flush();
+  digitalWrite(led, HIGH);
+}
+
+void loop() {
+  if ((millis() - adxlmillis) > adxlDelay) {
+    acel.askAcel();
+    int pastX = (int)acel.getX();
+    int pastY = (int)acel.getY();
+    int pastZ = (int)acel.getZ();
+    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
+    adxlmillis = millis();
+
+  }
+  if (button.buttonGet()) {
+    //Serial.println(cont);
+    //cont++;
+    Serial.println("A dormir.............");
+    delay(200);
+    esp_deep_sleep_start();
+
+
+  }
+}
+
+bool botonFun(int pin, bool* statePreviousButton, unsigned long* lastTime ) {
+  bool stateCurrentButton = digitalRead(pin);
+  const int delayMillis = 200;
+  bool flag = false;
+  if (*statePreviousButton != stateCurrentButton) {
+    if (HIGH == stateCurrentButton) {
+      if ((millis() - *lastTime) > delayMillis) {
+        //inicio
+        flag = true;
+        //final
+        *statePreviousButton = stateCurrentButton;
+        *lastTime = millis();
+      }
+    }
+    else {
+      *statePreviousButton = LOW;
+    }
+  }
+  return flag;
 }

@@ -38,7 +38,7 @@ static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
       counter = counter | (pData[i] << i * 8);
     }
     notifyFlag = counter == 1;
-
+    
     // print to Serial
     Serial.print("Characteristic 1 (Notify) from server: ");
     Serial.println(counter );
@@ -54,6 +54,7 @@ class MyClientCallback : public BLEClientCallbacks {
     void onDisconnect(BLEClient* pclient) {
       connected = false;
       doScan = true;
+      
       Serial.println("onDisconnect");
     }
 };

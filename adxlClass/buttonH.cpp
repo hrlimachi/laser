@@ -1,7 +1,7 @@
-#include "buttonH.h"
-#include "Arduino.h"
+#include "ButtonH.h"
+//#include "Arduino.h"
 
-buttonH::buttonH(int pin)
+ButtonH::ButtonH(int pin)
 {
   cont = 0;
   statePrevBut = LOW;
@@ -10,10 +10,10 @@ buttonH::buttonH(int pin)
   flag = false;
   pinButton= pin;
 }
-void buttonH::initButton(){
+void ButtonH::initButton(){
   pinMode(pinButton,INPUT);
 }
-bool buttonH::buttonGet(){
+bool ButtonH::buttonGet(){
   bool currentStateButton = digitalRead(pinButton);
   flag = false;
   if(statePrevBut != currentStateButton){
