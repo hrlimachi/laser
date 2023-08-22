@@ -1,7 +1,7 @@
 
 
 
-//#include <Wire.h>
+#include <Wire.h>
 #include "buttonH.h"
 #include "Adxl345.h"
 
@@ -9,14 +9,14 @@
 #define pin 15
 //millis adxl
 //-----------
-unsigned long adxlmillis = 0;
-int adxlDelay = 500;
+//unsigned long adxlmillis = 0;
+//int adxlDelay = 500;
 //---------
 //boton
 //---------------------------------------------------------------------------------------
-RTC_DATA_ATTR int bootNum = 0;
+//RTC_DATA_ATTR int bootNum = 0;
 int cont=0;
-
+//
 Adxl345 acel;
 ButtonH onButton(pin);
 BlinkLed tryLed(led);
@@ -28,26 +28,27 @@ void setup() {
   acel.adxlBegin();
   onButton.initButton();
   tryLed.initLed();
-  bootNum++;
-  Serial.println("numero de boot: " + String(bootNum));
+//  bootNum++;
+//  Serial.println("numero de boot: " + String(bootNum));
 
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
+//  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
 
-  Serial.println("deep sleep");
+//  Serial.println("deep sleep");
   Serial.flush();
-  
+  while(!tryLed.light(1000,true,5)){
+    Serial.println("esperando...");
+  }
+  Serial.println("ya salí");
 }
 
 void loop() {
-//  if ((millis() - adxlmillis) > adxlDelay) {
-//    acel.askAcel();
-//    int pastX = (int)acel.getX();
-//    int pastY = (int)acel.getY();
-//    int pastZ = (int)acel.getZ();
-//    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
-//    adxlmillis = millis();
-//
-//  }
+  if (sDelay.millisDelay(500)) {
+    acel.askAcel();
+    int pastX = (int)acel.getX();
+    int pastY = (int)acel.getY();
+    int pastZ = (int)acel.getZ();
+    Serial.println(String(pastX) + " " + String(pastY) + " " + String(pastZ));
+  }
   tryLed.light(1000);
   if (onButton.buttonGet()) {
     Serial.println(cont);
@@ -57,8 +58,5 @@ void loop() {
 //    esp_deep_sleep_start();
 
 
-  }
-  if(sDelay.millisDelay(2000)){
-    Serial.println("millis");
   }
 }
