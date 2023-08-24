@@ -4,13 +4,12 @@
    author unknown
    updated by chegewara and MoThunderz
 */
-
+#include "ButtonH.h"
 #include "BLEDevice.h"
 //#include "BLEScan.h"
 
 // Define UUIDs:
 static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
-static BLEUUID serviceUUID_2("4fafc201-1fb5-459e-8fcc-c5c9c331915b");
 static BLEUUID    charUUID_1("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 
 // Some variables to keep track on device connected
@@ -37,7 +36,9 @@ static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
     for (int i = 1; i < length; i++) {
       counter = counter | (pData[i] << i * 8);
     }
-    notifyFlag = counter == 1;
+    disp = int(counter);
+    counter == 1;
+    notifyFlag = true;
     
     // print to Serial
     Serial.print("Characteristic 1 (Notify) from server: ");
@@ -74,24 +75,14 @@ bool connectToServer() {
   Serial.println(" - Connected to server");
 
   // Obtain a reference to the service we are after in the remote BLE server.
-  BLERemoteService* pRemoteService;
-  if (disp == 1) {
-    pRemoteService = pClient->getService(serviceUUID);
+  BLERemoteService* pRemoteService = pClient->getService(serviceUUID);
     if (pRemoteService == nullptr) {
       Serial.print("Failed to find our service UUID: ");
       Serial.println(serviceUUID.toString().c_str());
       pClient->disconnect();
       return false;
     }
-  } else if (disp == 2) {
-    pRemoteService = pClient->getService(serviceUUID_2);
-    if (pRemoteService == nullptr) {
-      Serial.print("Failed to find our service UUID: ");
-      Serial.println(serviceUUID_2.toString().c_str());
-      pClient->disconnect();
-      return false;
-    }
-  }
+  
 
   Serial.println(" - Found our service");
 
@@ -133,15 +124,8 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
       Serial.println(advertisedDevice.toString().c_str());
 
       // We have found a device, let us now see if it contains the service we are looking for.
-      if (advertisedDevice.haveServiceUUID() && (advertisedDevice.isAdvertisingService(serviceUUID) || advertisedDevice.isAdvertisingService(serviceUUID_2))) {
-        if (advertisedDevice.isAdvertisingService(serviceUUID)) {
-          disp = 1;
-        }
-        else if (advertisedDevice.isAdvertisingService(serviceUUID_2)) {
-          disp = 2;
-        }
-        else
-          disp = 0;
+      if (advertisedDevice.haveServiceUUID() && (advertisedDevice.isAdvertisingService(serviceUUID))) {
+
         BLEDevice::getScan()->stop();
         myDevice = new BLEAdvertisedDevice(advertisedDevice);
         doConnect = true;
@@ -189,31 +173,17 @@ void loop() {
   // If we are connected to a peer BLE Server, update the characteristic each time we are reached
   // with the current time since boot.
   if (connected) {
-    if (disp == 1) {
+    if (disp == 1 && notifyFlag) {
       Serial.println("estoy conectado al final");
+      notifyFlag = false;
       delay(500);
     }
-    else if (disp == 2) {
+    else if (disp == 2 && notifyFlag) {
       Serial.println("estoy conectado al comienzo");
+      notifyFlag = false;
       delay(500);
     }
-    else{
-      Serial.println("no estoy conectado a nada");
-      delay(500);
-    }
-      
-    //    if(advertisedDevice.isAdvertisingService(serviceUUID)){
-    //      Serial.println("estoy conectado al comienzo");
-    //delay(500);
-    //    }
-    //    if(disp==1){
-    //      Serial.println("contar");
-    //      disp++;
-    //    }
-    //    else if(disp==2){
-    //      Serial.println("dejar de contar");
-    //      disp-=1;
-    //    }
+    
   } else if (doScan) {
     Serial.println("empezare a scanear");
     BLEDevice::getScan()->start(0);  // this is just example to start scan after disconnect, most likely there is better way to do it in arduino

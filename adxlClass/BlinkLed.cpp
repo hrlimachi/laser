@@ -15,8 +15,8 @@ bool BlinkLed::light(int delayMillis, bool countFlag, int times){
     digitalWrite(pinLed,newState);
     newState = !newState;
     millisTime = millis();
-    counter = countFlag ? counter+1 : counter;
-    if (countFlag && counter == times){
+    counter = (countFlag && !newState) ? counter+1 : counter;
+    if (countFlag && (counter >= times) && newState){
       counter = 0;
       return true;
     }
@@ -32,7 +32,4 @@ void BlinkLed::ledOn(){
 void BlinkLed::ledOff(){
   digitalWrite(pinLed,false);
   newState = false;
-}
-bool BlinkLed::countBlink(int delayMillis,int times){
-  
 }

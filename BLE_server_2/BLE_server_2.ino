@@ -2,10 +2,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-#include "ButtonH.h"
-#include "Adxl345.h"
 
-#define roundTime 1
 // Initialize all pointers
 BLEServer* pServer = NULL;                        // Pointer to the server
 BLECharacteristic* pCharacteristic_1 = NULL;      // Pointer to Characteristic 1
@@ -22,7 +19,7 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
 // Variable that will continuously be increased and written to the client
-uint32_t value = 1;
+uint32_t value = 2;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -33,17 +30,36 @@ uint32_t value = 1;
 
 // variable used by buttonFun
 int pinButton = 19;
+bool statPrevBut = LOW;
+unsigned long millisTime = 0;
 
-
-void goToDeepSleep(int sleepTime, bool typeSleep) {
-  esp_sleep_enable_timer_wakeup(sleepTime * 60 * 1000000);
-  if (typeSleep)
-    esp_deep_sleep_start();
-  else
-    esp_light_sleep_start();
+#define DEEP_SLEEP_TIME 1
+//sleep
+void goToDeepSleep(){
+  esp_sleep_enable_timer_wakeup(DEEP_SLEEP_TIME * 60 * 1000000);
+  esp_deep_sleep_start();
 }
 // Button with millis function
-
+bool botonFun(int pin, bool* statePreviousButton, unsigned long* lastTime ) {
+  bool stateCurrentButton = digitalRead(pin);
+  const int delayMillis = 200;
+  bool flag = false;
+  if (*statePreviousButton != stateCurrentButton) {
+    if (HIGH == stateCurrentButton) {
+      if ((millis() - *lastTime) > delayMillis) {
+        //inicio
+        flag = true;
+        //final
+        *statePreviousButton = stateCurrentButton;
+        *lastTime = millis();
+      }
+    }
+    else {
+      *statePreviousButton = LOW;
+    }
+  }
+  return flag;
+}
 
 
 // Callback function that is called whenever a client is connected or disconnected
@@ -58,30 +74,16 @@ class MyServerCallbacks: public BLEServerCallbacks {
       deviceConnected = false;
     }
 };
-class MyCallbacks: public BLECharacteristicCallbacks {
-      void onWrite(BLECharacteristic *pCharacteristic_1) {
-        std::string value = pCharacteristic_1->getValue();
-        Serial.print("Valor recibido: ");
-        Serial.println(value.c_str());
-        String num = value.c_str();
-        if (num == "3") {
-          digitalWrite(2, HIGH);
-        }
 
-      }
-  };
-MillisTime waitFor;
-ButtonH laserSignal(pinButton);
 void setup() {
   Serial.begin(115200);
-  laserSignal.initButton();
+
   // Create the BLE Device
   BLEDevice::init("fin"); //start
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
-  pCharacteristic_1->setCallbacks(new MyCallbacks());
 
   // Create the BLE Service
   BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -89,7 +91,6 @@ void setup() {
   // Create a BLE Characteristic
   pCharacteristic_1 = pService->createCharacteristic(
                         CHARACTERISTIC_UUID_1,
-                        BLECharacteristic::PROPERTY_WRITE |
                         BLECharacteristic::PROPERTY_NOTIFY
                       );
 
@@ -99,9 +100,9 @@ void setup() {
   pCharacteristic_1->addDescriptor(pDescr_1);
 
   // Add the BLE2902 Descriptor because we are using "PROPERTY_NOTIFY"
-  //  pBLE2902_1 = new BLE2902();
-  //  pBLE2902_1->setNotifications(true);
-  //  pCharacteristic_1->addDescriptor(pBLE2902_1);
+//  pBLE2902_1 = new BLE2902();
+//  pBLE2902_1->setNotifications(true);
+//  pCharacteristic_1->addDescriptor(pBLE2902_1);
 
   // Start the service
   pService->start();
@@ -113,32 +114,31 @@ void setup() {
   pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
   BLEDevice::startAdvertising();
   Serial.println("Waiting a client connection to notify...");
- // pinMode(pinButton, INPUT);
+  pinMode(pinButton, INPUT);
 }
 
 void loop() {
   // notify changed value
   if (deviceConnected) {
-    if (readyFlag && waitFor.millisDelay()) {
-      readyCount = !digitalRead(pinButton) ? readyCount + 1 : 0;
-      Serial.println("readyCount esta en: " + String(readyCount));
-      funFlag = readyCount >= 50;
+    if (readyFlag) {
+      readyCount = !digitalRead(pinButton) ? readyCount +1 : 0;
+      Serial.println("readyCount esta en: "+ String(readyCount));
+      funFlag = readyCount >=50;
       readyFlag = !funFlag;
+      delay(100);
     }
     else if (funFlag) {
-      if (laserSignal.buttonGet()) {
+      if (botonFun(pinButton, &statPrevBut, &millisTime)) {
         Serial.println("enviando numero");
         pCharacteristic_1->setValue(value);
         pCharacteristic_1->notify();
-        waitFlag = true;                     //flag to wait until next signal (calculate minutes)
-        funFlag = false;                     //stop executing main function
+        waitFlag = true;
+        funFlag=false;
       }
     }
-    else if (waitFlag) {
+    else if(waitFlag){
       delay(100);
-      goToDeepSleep(roundTime, false);
-      Serial.println("hice un light sleep");
-      
+      goToDeepSleep();
     }
   }
 

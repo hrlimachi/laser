@@ -1,0 +1,3 @@
+- hay que darle tambien un delay al cliente
+- los servidores tienen que iniciar con una intermitencia hasta la primera conexion
+- borrar todo y guardar el numero de vuelta

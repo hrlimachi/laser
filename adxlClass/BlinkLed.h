@@ -9,9 +9,8 @@ class BlinkLed{
     bool light(int delayMillis, bool countFlag = false, int times = 1);
     void ledOn();
     void ledOff();
-    bool countBlink(int delayMillis,int times);
   private:
-    unsigned long millisTime;
+    unsigned long millisTime = millis();
     bool newState = false;    //
     int pinLed;
     int counter;
