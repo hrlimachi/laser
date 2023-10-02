@@ -29,12 +29,12 @@ void Adxl345::askAcel() {
   y = (Wire.read() | (Wire.read() << 8));
   z = (Wire.read() | (Wire.read() << 8));
 }
-int16_t Adxl345::getX() {
+int Adxl345::getX() {
   return x;
 }
-int16_t Adxl345::getY() {
+int Adxl345::getY() {
   return y;
 }
-int16_t Adxl345::getZ() {
+int Adxl345::getZ() {
   return z;
 }

@@ -13,9 +13,9 @@ class Adxl345 {
     Adxl345(){}
     void adxlBegin();
     void askAcel();
-    int16_t getX();
-    int16_t getY();
-    int16_t getZ();
+    int getX();
+    int getY();
+    int getZ();
   private:
     int16_t x;
     int16_t y;

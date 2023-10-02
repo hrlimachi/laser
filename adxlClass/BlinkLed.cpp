@@ -23,7 +23,14 @@ bool BlinkLed::light(int delayMillis, bool countFlag, int times){
   }
   return false;
 }
-
+void BlinkLed::delayLight(int delayTime,int times){
+  for(int i=0;i<times;i++){
+    digitalWrite(pinLed,HIGH);
+    delay(delayTime);
+    digitalWrite(pinLed,LOW);
+    delay(delayTime);
+  }
+}
 
 void BlinkLed::ledOn(){
   digitalWrite(pinLed,true);

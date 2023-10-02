@@ -1,4 +1,4 @@
-#include <buttonH.h>
+//#include <buttonH.h>
 #include <Wire.h>
 #define ADXL345_ADDRESS 0x53
 #define led 2
@@ -11,7 +11,7 @@ int adxlDelay = 500;
 //---------------------------------------------------------------------------------------
 int cont = 0;
 RTC_DATA_ATTR int bootNum = 0;
-int pin = 15;
+int pin = 35;
 
 //-----------------------------------------------------------------------------------------
 class Adxl345 {
@@ -70,20 +70,20 @@ int16_t Adxl345::getZ() {
 }
 //--------------------------------------------
 Adxl345 acel;
-buttonH button(pin);
+//buttonH button(pin);
 
 
 void setup() {
   Serial.begin(115200);
   delay(10);
   acel.adxlBegin();
-  button.initButton();
+//  button.initButton();
   bootNum++;
   Serial.println("numero de boot: " + String(bootNum));
 
   pinMode(pin, INPUT);
   pinMode(led, OUTPUT);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_35, 1); //1 = High, 0 = Low
 
   Serial.println("deep sleep");
   Serial.flush();
@@ -100,11 +100,11 @@ void loop() {
     adxlmillis = millis();
 
   }
-  if (button.buttonGet()) {
+  if (digitalRead(pin)){//button.buttonGet()) {
     //Serial.println(cont);
     //cont++;
     Serial.println("A dormir.............");
-    delay(200);
+    delay(1000);
     esp_deep_sleep_start();
 
 

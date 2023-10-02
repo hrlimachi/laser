@@ -17,7 +17,7 @@ int adxlDelay = 50;
 int cont = 0;
 RTC_DATA_ATTR int bootNum = 0;
 char pru[13] = "";
-int pinButton = 15;
+int pinButton = 35;
 
 bool statPrevBut = LOW;
 unsigned long millisTime = 0;
@@ -140,7 +140,7 @@ void setup() {
 
   pinMode(pinButton , INPUT);
   pinMode(led, OUTPUT);
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, 1); //1 = High, 0 = Low
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_35, 1); //1 = High, 0 = Low
 
   if (!SD.begin())
   {

@@ -37,7 +37,7 @@ static void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic,
       counter = counter | (pData[i] << i * 8);
     }
     disp = int(counter);
-    counter == 1;
+    //counter == 1;
     notifyFlag = true;
     
     // print to Serial
@@ -172,16 +172,27 @@ void loop() {
 
   // If we are connected to a peer BLE Server, update the characteristic each time we are reached
   // with the current time since boot.
+  /*
+   * registrar pasos continuamente
+   * sin importar si esta conectado o no
+  */
   if (connected) {
     if (disp == 1 && notifyFlag) {
       Serial.println("estoy conectado al final");
       notifyFlag = false;
       delay(500);
+      /*
+       * dejar de contar, entrar en modo de reposo, guardar en memoria
+       */
     }
     else if (disp == 2 && notifyFlag) {
       Serial.println("estoy conectado al comienzo");
       notifyFlag = false;
       delay(500);
+      /*
+       * contar los pasos tomando registro del tiempo
+       * tomar tiempo entre cada paso
+       */
     }
     
   } else if (doScan) {

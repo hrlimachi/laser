@@ -1,3 +1,5 @@
+
+
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -42,8 +44,8 @@ void goToDeepSleep(int sleepTime, bool typeSleep) {
   else
     esp_light_sleep_start();
 }
-// Button with millis function
 
+// Button with millis function
 
 
 // Callback function that is called whenever a client is connected or disconnected
@@ -134,10 +136,13 @@ void loop() {
         funFlag = false;                     //stop executing main function
       }
     }
+    else{
+      
+    }
     else if (waitFlag) {
       delay(100);
       goToDeepSleep(roundTime, false);
-      Serial.println("hice un light sleep");
+      //Serial.println("hice un light sleep");
       
     }
   }
